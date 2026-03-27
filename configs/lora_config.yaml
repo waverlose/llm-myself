@@ -1,0 +1,34 @@
+model:
+  name: "Qwen/Qwen2.5-3B-Instruct"
+  max_length: 2048
+  
+lora:
+  r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules:
+    - "q_proj"
+    - "k_proj"
+    - "v_proj"
+    - "o_proj"
+    - "gate_proj"
+    - "up_proj"
+    - "down_proj"
+
+training:
+  output_dir: "./models/qwen-echo-friend"
+  num_train_epochs: 3
+  per_device_train_batch_size: 4
+  gradient_accumulation_steps: 4
+  learning_rate: 2.0e-4
+  fp16: true
+  logging_steps: 10
+  save_steps: 500
+  warmup_steps: 100
+  
+data:
+  train_files:
+    - "./data/persona.jsonl"
+    - "./data/tools.jsonl"
+    - "./data/hobbies.jsonl"
+  test_size: 0.1

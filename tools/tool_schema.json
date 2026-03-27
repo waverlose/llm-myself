@@ -1,0 +1,73 @@
+{
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "get_weather",
+        "description": "获取指定城市的天气信息",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "city": {
+              "type": "string",
+              "description": "城市名称，如：南京、北京、上海"
+            },
+            "date": {
+              "type": "string",
+              "description": "查询日期，如：today、tomorrow、week。默认为today",
+              "default": "today"
+            }
+          },
+          "required": ["city"]
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "search_web",
+        "description": "搜索互联网信息",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "搜索关键词"
+            }
+          },
+          "required": ["query"]
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "calculate",
+        "description": "执行数学计算、单位换算、货币转换等",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "operation": {
+              "type": "string",
+              "description": "计算类型，如：add、subtract、multiply、divide、percent、sqrt、power、convert、currency、bmi等"
+            },
+            "a": {"type": "number", "description": "第一个操作数"},
+            "b": {"type": "number", "description": "第二个操作数"},
+            "value": {"type": "number", "description": "单个操作数的值"},
+            "base": {"type": "number", "description": "基数"},
+            "exponent": {"type": "number", "description": "指数"},
+            "percent": {"type": "number", "description": "百分比"},
+            "from": {"type": "string", "description": "源单位或源货币"},
+            "to": {"type": "string", "description": "目标单位或目标货币"},
+            "amount": {"type": "number", "description": "金额"},
+            "values": {"type": "array", "description": "数值数组"},
+            "radius": {"type": "number", "description": "半径"},
+            "height": {"type": "number", "description": "高度"},
+            "weight": {"type": "number", "description": "重量"}
+          },
+          "required": ["operation"]
+        }
+      }
+    }
+  ]
+}

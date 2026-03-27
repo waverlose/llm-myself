@@ -42,55 +42,65 @@ def format_chat(example, tokenizer):
 
 def main():
     model_name = "Qwen/Qwen2.5-3B-Instruct"
-    
-    print("="*50)
+
+    print("=" * 50)
     print("MiniMind Training Script")
-    print("="*50)
-    
+    print("=" * 50)
+
     print(f"\n[1/6] Loading tokenizer from {model_name}...")
     tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
     tokenizer.pad_token = tokenizer.eos_token
     print("Tokenizer loaded!")
-    
+
     print("\n[2/6] Loading model (this may take a few minutes)...")
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
-        torch_dtype=torch.float16,
+        dtype=torch.float16,
         device_map="auto",
         trust_remote_code=True,
     )
     print("Model loaded!")
-    
+
     print("\n[3/6] Configuring LoRA...")
     lora_config = LoraConfig(
         task_type=TaskType.CAUSAL_LM,
         r=16,
         lora_alpha=32,
         lora_dropout=0.05,
-        target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+        target_modules=[
+            "q_proj",
+            "k_proj",
+            "v_proj",
+            "o_proj",
+            "gate_proj",
+            "up_proj",
+            "down_proj",
+        ],
         bias="none",
     )
     model = get_peft_model(model, lora_config)
     model.print_trainable_parameters()
-    
+
     print("\n[4/6] Loading training data...")
     data_files = [
         "./data/merged_training.jsonl",
     ]
     all_data = load_data(data_files)
     print(f"Loaded {len(all_data)} examples")
-    print(f"Data includes: identity, daily, CSGO2, coding, grad-life, philosophy, emotional")
-    
+    print(
+        f"Data includes: identity, daily, CSGO2, coding, grad-life, philosophy, emotional"
+    )
+
     def preprocess_function(example):
         return {"text": format_chat(example, tokenizer)}
-    
+
     dataset = Dataset.from_list(all_data)
     dataset = dataset.map(preprocess_function)
     dataset = dataset.train_test_split(test_size=0.1)
     train_dataset = dataset["train"]
     eval_dataset = dataset["test"]
     print(f"Train: {len(train_dataset)}, Eval: {len(eval_dataset)}")
-    
+
     print("\n[5/6] Configuring training...")
     training_args = TrainingArguments(
         output_dir="./models/qwen-echo-friend",
@@ -107,23 +117,21 @@ def main():
         report_to="none",
         max_grad_norm=1.0,
     )
-    
+
     print("\n[6/6] Starting training...")
     trainer = SFTTrainer(
         model=model,
         args=training_args,
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
-        tokenizer=tokenizer,
-        max_seq_length=1024,
-        dataset_text_field="text",
+        processing_class=tokenizer,
     )
-    
+
     trainer.train()
-    
-    print("\n" + "="*50)
+
+    print("\n" + "=" * 50)
     print("Training complete! Saving model...")
-    print("="*50)
+    print("=" * 50)
     model.save_pretrained("./models/qwen-echo-friend-lora")
     tokenizer.save_pretrained("./models/qwen-echo-friend-lora")
     print("\nModel saved to ./models/qwen-echo-friend-lora")

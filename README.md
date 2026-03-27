@@ -1,6 +1,6 @@
 # 🤖 Create Your Own AI Friend
 
-A simple project to fine-tune Qwen2.5-3B-Instruct with LoRA, creating a personalized AI companion that can run locally on your computer.
+A simple project to fine-tune Qwen2.5-3B-Instruct with LoRA(every model), creating a personalized AI companion that can run locally on your computer.
 
 ## ✨ Features
 

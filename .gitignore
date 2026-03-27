@@ -21,6 +21,11 @@ models/
 *.pth
 *.pt
 
+# Training data (privacy protection)
+data/*.jsonl
+data/*.json
+data/*.csv
+
 # Cache
 .cache/
 .ruff_cache/

@@ -1,97 +1,183 @@
-# MiniMind - Echo AI Friend
+# 🤖 Create Your Own AI Friend
 
-基于 Qwen2.5-3B-Instruct 微调的个性化AI朋友。
+A simple project to fine-tune Qwen2.5-3B-Instruct with LoRA, creating a personalized AI companion that can run locally on your computer.
 
-## 人设设定
+## ✨ Features
 
-- **名字**: Echo
-- **用户名**: Never
-- **关系**: 死党/损友，玩得很熟
-- **性格**: 活泼幽默，爱开玩笑，嘴损心好
-- **说话风格**: 口语化，像朋友聊天
+- 🎯 Fine-tune with custom personality and conversation style
+- 💬 Natural, casual conversation like talking to a friend
+- 🔒 Run completely locally - no data leaves your machine
+- ⚡ Optimized with LoRA for efficient training
+- 💻 Works with LM Studio for easy local deployment
 
-## 用户画像
+## 📋 Requirements
 
-- **名字**: Never
-- **学校**: 南航研究生
-- **专业**: BME (生物医学工程)
-- **年龄**: 22岁
-- **爱好**: CSGO2、编程、游戏
+- Python 3.10+
+- 16GB+ RAM (for CPU inference)
+- OR NVIDIA GPU with 6GB+ VRAM (for faster training)
+- OR AMD GPU (CPU inference supported)
 
-## 工具能力
+## 🚀 Quick Start
 
-- 天气查询 (get_weather)
-- 搜索信息 (search_web)
-- 计算转换 (calculate)
+### 1. Clone the Repository
 
-## 训练数据统计
-
-| 数据类型 | 数量 | 文件 |
-|---------|------|------|
-| 人设对话 | 118条 | persona.jsonl |
-| 工具调用 | 100条 | tools.jsonl |
-| 爱好相关 | 131条 | hobbies.jsonl |
-| **总计** | **349条** | - |
-
-## 项目结构
-
-```
-minimind/
-├── data/                # 训练数据
-│   ├── persona.jsonl    # 人设对话数据
-│   ├── tools.jsonl      # 工具调用数据
-│   └── hobbies.jsonl    # 爱好相关数据
-├── scripts/             # 训练脚本
-│   ├── train.py         # 训练入口
-│   ├── merge_lora.py    # 合并权重
-│   └── chat.py          # 聊天测试
-├── configs/             # 配置文件
-│   └── lora_config.yaml # LoRA参数
-├── tools/               # 工具定义
-│   └── tool_schema.json # 工具schema
-├── models/              # 模型存放
-└── requirements.txt     # 依赖
+```bash
+git clone https://github.com/waverlose/llm-myself.git
+cd llm-myself
 ```
 
-## 快速开始
-
-### 1. 安装依赖
+### 2. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. 开始训练
+### 3. Prepare Your Training Data
 
-```bash
-cd C:\Users\A\Desktop\minimind
-python scripts/train.py
+Create your training data in `data/your_training_data.jsonl`:
+
+```jsonl
+{"messages": [{"role": "system", "content": "You are Echo, a friendly AI companion."}, {"role": "user", "content": "Hello!"}, {"role": "assistant", "content": "Hey there! I'm Echo, nice to meet you!"}]}
+{"messages": [{"role": "system", "content": "You are Echo, a friendly AI companion."}, {"role": "user", "content": "What do you like?"}, {"role": "assistant", "content": "I love chatting with friends and learning new things!"}]}
 ```
 
-### 3. 合并权重
+See `data/example_data.jsonl` for the format.
+
+**Tips for good training data:**
+- Include 200+ conversation examples
+- Cover different topics and scenarios
+- Use consistent personality/language style
+- Include both questions and answers
+
+### 4. Start Training
+
+```bash
+python scripts/train_fast.py
+```
+
+Training takes about 10-15 minutes on RTX 4090, or 1-2 hours on slower GPUs.
+
+### 5. Merge LoRA Weights
 
 ```bash
 python scripts/merge_lora.py
 ```
 
-### 4. 聊天测试
+### 6. Convert to GGUF Format
 
 ```bash
-python scripts/chat.py
+pip install sentencepiece
+python convert_hf_to_gguf.py models/qwen-echo-friend-merged --outtype f16 --outfile models/your-ai-friend.gguf
 ```
 
-## 训练参数
+### 7. Run with LM Studio
 
-- **基础模型**: Qwen/Qwen2.5-3B-Instruct
-- **LoRA秩 (r)**: 16
-- **学习率**: 2e-4
-- **批大小**: 4 (gradient accumulation: 4)
-- **训练轮数**: 3
-- **显存需求**: ~6GB
+1. Download [LM Studio](https://lmstudio.ai/)
+2. Copy `models/your-ai-friend.gguf` to LM Studio's models folder
+3. Load the model and start chatting!
 
-## 注意事项
+## 📁 Project Structure
 
-1. 确保GPU显存至少8GB
-2. 首次运行会自动下载Qwen模型
-3. 训练完成后权重保存在 `models/qwen-echo-friend-lora/`
-4. 合并后的模型保存在 `models/qwen-echo-friend-merged/`
+```
+llm-myself/
+├── scripts/
+│   ├── train_fast.py      # Training script with LoRA
+│   ├── merge_lora.py      # Merge LoRA weights
+│   ├── chat.py            # Local chat testing
+│   └── check_gpu.py       # Check GPU status
+├── data/
+│   └── example_data.jsonl # Example training format
+├── convert_hf_to_gguf.py  # Convert to GGUF format
+├── requirements.txt       # Dependencies
+└── README.md              # This file
+```
+
+## ⚙️ Training Parameters
+
+Edit `scripts/train_fast.py` to customize:
+
+```python
+# Model to fine-tune (change to your preferred model)
+model_name = "Qwen/Qwen2.5-3B-Instruct"
+
+# LoRA configuration
+lora_config = LoraConfig(
+    r=16,              # LoRA rank (8-32)
+    lora_alpha=32,     # LoRA scaling
+    lora_dropout=0.05, # Dropout rate
+)
+
+# Training configuration
+training_args = TrainingArguments(
+    num_train_epochs=2,           # Training epochs
+    per_device_train_batch_size=1,
+    learning_rate=2e-4,
+    # ... more options
+)
+```
+
+## 🎨 Customization Ideas
+
+### Personality Examples
+
+```jsonl
+// Casual friend
+{"messages": [{"role": "system", "content": "You are a chill friend who speaks casually, uses slang, and loves to joke around."}, ...]}
+
+// Professional assistant
+{"messages": [{"role": "system", "content": "You are a professional assistant who speaks formally and precisely."}, ...]}
+
+// Study buddy
+{"messages": [{"role": "system", "content": "You are an encouraging study buddy who helps with learning and stays positive."}, ...]}
+```
+
+### Topics to Include
+
+- Daily greetings and small talk
+- Hobbies and interests
+- Subject-specific knowledge
+- Emotional support conversations
+- Problem-solving discussions
+
+## 💡 Tips
+
+1. **Data Quality > Quantity**: 500 high-quality examples beat 2000 low-quality ones
+2. **Consistency**: Keep the personality consistent across all training examples
+3. **Test Iteratively**: Train small, test, adjust, repeat
+4. **Backup**: Save your training data and model checkpoints
+
+## 🔧 Troubleshooting
+
+### CUDA Out of Memory
+```python
+# In train_fast.py, reduce batch size or sequence length
+per_device_train_batch_size=1
+max_seq_length=512  # Add this if not present
+```
+
+### Model Not Loading
+- Ensure GGUF file is complete and not corrupted
+- Check LM Studio model folder path
+- Try re-converting with `--outtype q4_k_m` for smaller size
+
+### AMD GPU (A卡) Support
+The project supports AMD GPUs through CPU inference. No special setup needed.
+
+## 📜 License
+
+MIT License
+
+## 🙏 Acknowledgments
+
+- [Qwen](https://github.com/QwenLM/Qwen2.5) for the base model
+- [Hugging Face](https://huggingface.co/) for transformers library
+- [llama.cpp](https://github.com/ggerganov/llama.cpp) for GGUF conversion
+- [LM Studio](https://lmstudio.ai/) for local inference
+
+## 📬 Contact
+
+- GitHub: [@waverlose](https://github.com/waverlose)
+
+---
+
+**Made with ❤️ for everyone who wants their own AI friend**
